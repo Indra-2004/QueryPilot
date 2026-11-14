@@ -36,3 +36,18 @@ class Base(DeclarativeBase):
     pass
 
 
+class ConnectionProfile(Base):
+    __tablename__ = "connection_profiles"
+
+    connection_id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    owner_id: Mapped[str] = mapped_column(String(255), index=True)
+    name: Mapped[str] = mapped_column(String(120))
+    dialect: Mapped[str] = mapped_column(String(30))
+    encrypted_uri: Mapped[str] = mapped_column(Text)
+    provider_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    last_health_check: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+
