@@ -292,3 +292,13 @@ Metrics:
 
 ---
 
+## Future Work
+
+- Cost-based query optimization feedback
+- Fine-tuned text-to-SQL model
+- UI for query tracing and debugging
+- Support for multi-database federation
+- Reinforcement learning from execution feedback
+
+---
+
