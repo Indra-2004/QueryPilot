@@ -65,3 +65,38 @@ def _profile_from_mapping(profile: Mapping[str, Any]) -> ProviderProfile:
     if kind == "openai_compatible" and not validate_base_url(base_url): raise ProviderError("missing_base_url", "OpenAI-compatible providers require base_url")
     return ProviderProfile(str(profile.get("provider_id", "default")), str(profile.get("owner_id", "default")), str(profile.get("name", kind)), kind, str(api_key), str(profile.get("model") or ""), base_url, bool(profile.get("enabled", True)))
 
+def get_llm(provider_id: str | None = None, model: str | None = None, profile: ProviderProfile | Mapping[str, Any] | None = None):
+    with open("configs/model.yaml") as f: cfg = yaml.safe_load(f) or {}
+    if profile is None:
+        if provider_id not in (None, "default"):
+            try:
+                from app.llm.profiles import get_profile
+                profile = get_profile(provider_id)
+            except Exception:
+                profile = None
+            if profile is None:
+                raise ProviderError("provider_not_found", f"Provider {provider_id} was not resolved")
+        if profile is not None:
+            p = profile if isinstance(profile, ProviderProfile) else _profile_from_mapping(profile)
+        else:
+            if not settings.groq_api_key: raise ProviderError("missing_api_key", "GROQ_API_KEY is not configured")
+            p = ProviderProfile("default", "default", "Default Groq", "groq", settings.groq_api_key, model or cfg.get("model", "openai/gpt-oss-20b"))
+    else:
+        p = profile if isinstance(profile, ProviderProfile) else _profile_from_mapping(profile)
+        if not p.enabled: raise ProviderError("provider_disabled", "Provider is disabled")
+    kwargs = {"model": model or p.model, "temperature": cfg.get("temperature", 0), "max_tokens": cfg.get("max_tokens"), "api_key": p.api_key}
+    kwargs = {k: v for k, v in kwargs.items() if v is not None}
+    if p.provider_type == "groq": return ChatGroq(**kwargs)
+    if p.provider_type in {"openai", "openai_compatible"}:
+        if ChatOpenAI is None: raise ProviderError("provider_dependency_missing", "langchain-openai is required")
+        if p.base_url: kwargs["base_url"] = p.base_url
+        return ChatOpenAI(**kwargs)
+    if p.provider_type == "gemini":
+        if ChatGoogleGenerativeAI is None: raise ProviderError("provider_dependency_missing", "langchain-google-genai is required")
+        kwargs["google_api_key"] = kwargs.pop("api_key"); return ChatGoogleGenerativeAI(**kwargs)
+    if p.provider_type == "anthropic":
+        try: from langchain_anthropic import ChatAnthropic
+        except ImportError as exc: raise ProviderError("provider_dependency_missing", "langchain-anthropic is required") from exc
+        kwargs["anthropic_api_key"] = kwargs.pop("api_key"); return ChatAnthropic(**kwargs)
+    raise ProviderError("unsupported_provider", p.provider_type)
+
