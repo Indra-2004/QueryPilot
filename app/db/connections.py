@@ -64,3 +64,12 @@ def _fernet() -> Fernet:
         raise ConnectionError("SECRETS_ENCRYPTION_KEY must be a valid Fernet key") from exc
 
 
+def _store_engine() -> Engine:
+    uri = os.environ.get("CONNECTION_STORE_URI", "sqlite:///data/connections.db")
+    if uri.startswith("sqlite:///"):
+        os.makedirs(os.path.dirname(uri.removeprefix("sqlite:///")) or ".", exist_ok=True)
+    engine = create_engine(uri)
+    Base.metadata.create_all(engine)
+    return engine
+
+
