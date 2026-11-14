@@ -121,3 +121,68 @@ def markdown_report(report: dict) -> str:
     return "\n".join(lines) + "\n"
 
 
+def reduction(before: float, after: float) -> float:
+    return round(100 * (before - after) / before, 2) if before else 0.0
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--base-url", default="https://nerfsql-demo.onrender.com")
+    parser.add_argument("--connection-id")
+    parser.add_argument("--connection-name", default="sd")
+    parser.add_argument("--provider-id")
+    parser.add_argument("--delay", type=float, default=2.0, help="Delay between LLM calls for free-tier rate limits")
+    parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--max-attempts", type=int, default=3)
+    parser.add_argument("--modes", nargs="+", choices=["rag", "full"], default=["rag", "full"])
+    parser.add_argument("--output-dir", default="benchmark-results")
+    args = parser.parse_args()
+
+    with open(ROOT / "benchmark_cases.json", encoding="utf-8") as handle:
+        cases = json.load(handle)
+    if args.limit:
+        cases = cases[: args.limit]
+
+    connection_id = args.connection_id
+    if not connection_id:
+        status, payload = request_json(args.base_url, "/connections")
+        if status != 200:
+            raise SystemExit(f"Could not list connections: {status} {payload}")
+        match = next((item for item in payload.get("connections", []) if item.get("name") == args.connection_name), None)
+        if not match:
+            raise SystemExit(f"Connection named {args.connection_name!r} was not found")
+        connection_id = match["connection_id"]
+
+    results: dict[str, list[dict]] = {}
+    for mode in args.modes:
+        mode_rows = []
+        for number, case in enumerate(cases, 1):
+            payload = {"question": case["question"], "connection_id": connection_id, "provider_id": args.provider_id, "schema_strategy": mode}
+            status, response, wall_latency_ms = run_query_with_backoff(
+                args.base_url, payload, args.max_attempts
+            )
+            scored = score_case(case, response, status)
+            row = {"id": case["id"], "question": case["question"], "mode": mode, "status": status, "sql": response.get("sql"), "result": response.get("result"), "retries": response.get("retries", 0), "metrics": response.get("metrics", {}), "wall_latency_ms": wall_latency_ms, **scored}
+            mode_rows.append(row)
+            print(f"[{mode}] {number}/{len(cases)} {case['id']}: {'PASS' if row['correct'] else 'FAIL'} ({wall_latency_ms} ms)")
+            if args.delay:
+                time.sleep(args.delay)
+        results[mode] = mode_rows
+
+    summary = {mode: summarize(rows) for mode, rows in results.items()}
+    comparison = {}
+    if "rag" in summary and "full" in summary:
+        comparison = {
+            "hallucination_reduction_pct": reduction(summary["full"]["hallucination_rate_pct"], summary["rag"]["hallucination_rate_pct"]),
+            "input_token_reduction_pct": reduction(summary["full"]["total_input_tokens"], summary["rag"]["total_input_tokens"]),
+        }
+    report = {"generated_at": datetime.now(timezone.utc).isoformat(), "base_url": args.base_url, "connection_id": connection_id, "case_count": len(cases), "summary": summary, "comparison": comparison, "results": results}
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "metrics.json").write_text(json.dumps(report, indent=2, default=str), encoding="utf-8")
+    (output_dir / "REPORT.md").write_text(markdown_report(report), encoding="utf-8")
+    print(f"Wrote {output_dir / 'metrics.json'} and {output_dir / 'REPORT.md'}")
+
+
+if __name__ == "__main__":
+    main()
