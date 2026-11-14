@@ -166,3 +166,17 @@ def get_profile(connection_id: str, owner_id: str | None = None) -> ConnectionPr
         return profile
 
 
+def delete_profile(connection_id: str, owner_id: str) -> bool:
+    with Session(metadata_engine(), expire_on_commit=False) as session:
+        profile = session.get(ConnectionProfile, connection_id)
+        if not profile or profile.owner_id != owner_id:
+            return False
+        session.delete(profile)
+        session.commit()
+    with _lock:
+        engine = _engines.pop(connection_id, None)
+        if engine:
+            engine.dispose()
+    return True
+
+
