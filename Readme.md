@@ -119,3 +119,35 @@ Correction Loop (LLM)
 
 ---
 
+## Project Structure
+
+```
+NerfSQL/
+│
+├── app/
+│   ├── graph/              # LangGraph nodes and edges
+│   ├── retriever/          # Schema embedding + retrieval
+│   ├── llm/                # Groq client + prompts
+│   ├── db/                 # DB connection + execution
+│   ├── validators/         # SQL + schema validation
+│   ├── utils/              # logging, parsing, helpers
+│
+├── configs/
+│   ├── model.yaml
+│   ├── db.yaml
+│
+├── data/
+│   ├── schema_chunks.json
+│
+├── tests/
+│   ├── eval_queries.json   # input + expected outputs
+│
+├── scripts/
+│   ├── ingest_schema.py
+│
+├── README.md
+└── requirements.txt
+```
+
+---
+
