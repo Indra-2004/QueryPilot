@@ -201,3 +201,5 @@ def execute_profile_query(connection_id: str, sql: str, *, owner_id: str | None 
         return [dict(row._mapping) for row in result]
 
 
+def default_connection_uri() -> str:
+    return os.environ.get("DB_URI") or (LOCAL_DB_URI if os.path.exists("data/local.db") else "")
