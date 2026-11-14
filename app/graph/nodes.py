@@ -48,3 +48,17 @@ class AgentState(TypedDict):
     llm_latency_ms: float
 
 
+def _record_llm_usage(state: AgentState, response, elapsed_ms: float) -> AgentState:
+    usage = getattr(response, "usage_metadata", None) or {}
+    if not usage:
+        usage = (getattr(response, "response_metadata", None) or {}).get("token_usage", {})
+    input_tokens = usage.get("input_tokens", usage.get("prompt_tokens", 0)) or 0
+    output_tokens = usage.get("output_tokens", usage.get("completion_tokens", 0)) or 0
+    return {
+        **state,
+        "input_tokens": state.get("input_tokens", 0) + int(input_tokens),
+        "output_tokens": state.get("output_tokens", 0) + int(output_tokens),
+        "llm_calls": state.get("llm_calls", 0) + 1,
+        "llm_latency_ms": round(state.get("llm_latency_ms", 0.0) + elapsed_ms, 2),
+    }
+
