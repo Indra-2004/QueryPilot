@@ -47,3 +47,11 @@ def extract_schema_from_engine(engine: Engine) -> list[str]:
     return chunks
 
 
+def extract_schema(db_uri: str) -> list[str]:
+    engine = create_engine(db_uri)
+    try:
+        return extract_schema_from_engine(engine)
+    finally:
+        engine.dispose()
+
+
