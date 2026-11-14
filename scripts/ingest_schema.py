@@ -55,3 +55,16 @@ def extract_schema(db_uri: str) -> list[str]:
         engine.dispose()
 
 
+def _list_index_names(pc: Pinecone) -> set[str]:
+    indexes: Any = pc.list_indexes()
+    if hasattr(indexes, "names"):
+        return set(indexes.names())
+    names: set[str] = set()
+    for idx in indexes:
+        if isinstance(idx, dict) and "name" in idx:
+            names.add(idx["name"])
+        elif hasattr(idx, "name"):
+            names.add(idx.name)
+    return names
+
+
