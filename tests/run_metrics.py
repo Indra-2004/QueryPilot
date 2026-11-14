@@ -110,3 +110,14 @@ def summarize(rows: list[dict]) -> dict:
     }
 
 
+def markdown_report(report: dict) -> str:
+    summaries = report["summary"]
+    lines = ["# NerfSQL benchmark report", "", f"Generated: {report['generated_at']}", "", "| Mode | Cases | Accuracy | Hallucination rate | Input tokens | p95 latency |", "|---|---:|---:|---:|---:|---:|"]
+    for mode in ("rag", "full"):
+        row = summaries.get(mode, {})
+        lines.append(f"| {mode.upper()} | {row.get('cases', 0)} | {row.get('accuracy_pct', 0)}% | {row.get('hallucination_rate_pct', 0)}% | {row.get('total_input_tokens', 0)} | {row.get('p95_latency_ms', 0)} ms |")
+    comparison = report.get("comparison", {})
+    lines.extend(["", "## Comparison", "", f"- Hallucination reduction: **{comparison.get('hallucination_reduction_pct', 0)}%**", f"- Input-token reduction: **{comparison.get('input_token_reduction_pct', 0)}%**", "", "> Metrics are evidence only for the recorded model, dataset, configuration, and timestamp."])
+    return "\n".join(lines) + "\n"
+
+
