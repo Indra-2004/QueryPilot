@@ -70,3 +70,12 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["Content-Security-Policy"] = "default-src 'none'; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'self'"
         return response
 
+app.add_middleware(SecurityHeadersMiddleware)
+
+class QueryRequest(BaseModel):
+    question: str
+    connection_id: str | None = None
+    provider_id: str | None = None
+    model: str | None = None
+    schema_strategy: Literal["rag", "full"] = "rag"
+
