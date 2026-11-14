@@ -150,3 +150,27 @@
 
 ---
 
+## Retriever Quality Tests
+
+### 16. Travel-Focused Retrieval
+**Question:** Total travel emissions by user
+
+**Expected:**
+- Retrieved context includes `travel_entries`
+- Query generation uses `travel_entries` and `users`
+
+---
+
+### 17. Goal-Focused Retrieval
+**Question:** Active emission reduction targets
+
+**Expected:**
+- Retrieved context includes `goals`
+
+---
+
+### 18. Recommendation-Focused Retrieval
+**Question:** Best actions to cut footprint
+
+**Expected:**
+- Retrieved context includes `recommendations`
