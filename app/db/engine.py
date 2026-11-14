@@ -16,3 +16,29 @@ def _candidate_uris() -> list[str]:
         uris.append(LOCAL_DB_URI)
     return uris
 
+def get_engine(connection_id: str | None = None, *, owner_id: str | None = None):
+    if connection_id:
+        from app.db.connections import get_connection_engine
+        return get_connection_engine(connection_id, owner_id=owner_id)
+    global _engine
+    if _engine is None:
+        last_error: Exception | None = None
+        for uri in _candidate_uris():
+            try:
+                candidate = create_engine(uri)
+                with candidate.connect() as conn:
+                    conn.execute(text("SELECT 1"))
+                _engine = candidate
+                break
+            except SQLAlchemyError as e:
+                last_error = e
+
+        if _engine is None:
+            configured = settings.db_uri or "<not set>"
+            raise RuntimeError(
+                "Unable to connect to configured DB_URI and no working local fallback found. "
+                f"Configured DB_URI={configured}. "
+                "Set a valid DB_URI or create data/local.db via scripts/create_sample_db.py"
+            ) from last_error
+    return _engine
+
