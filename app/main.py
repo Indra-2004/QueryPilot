@@ -14,3 +14,9 @@ _graph = None
 _retriever = None
 _session_manager = SessionManager()
 
+def _get_graph():
+    global _graph
+    if _graph is None:
+        _graph = build_graph()
+    return _graph
+
