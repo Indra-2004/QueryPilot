@@ -318,3 +318,9 @@ This project focuses on:
 
 ---
 
+## License
+
+MIT License
+
+---
+
