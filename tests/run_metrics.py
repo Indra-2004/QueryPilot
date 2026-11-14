@@ -84,3 +84,11 @@ def score_case(case: dict, response: dict, status: int) -> dict:
     }
 
 
+def percentile(values: list[float], pct: float) -> float:
+    if not values:
+        return 0.0
+    ordered = sorted(values)
+    index = max(0, math.ceil((pct / 100) * len(ordered)) - 1)
+    return round(ordered[index], 2)
+
+
