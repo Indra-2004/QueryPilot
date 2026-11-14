@@ -13,3 +13,14 @@ from typing import Dict, Optional
 from uuid import uuid4
 
 
+@dataclass
+class QueryRecord:
+    """Represents a natural language query from the user."""
+    timestamp: datetime
+    question: str
+    error: Optional[str] = None
+    connection_id: Optional[str] = None
+    provider_id: Optional[str] = None
+    model: Optional[str] = None
+
+
