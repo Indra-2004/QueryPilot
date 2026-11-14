@@ -41,3 +41,19 @@ def _database_ready(path: str) -> bool:
             return bool(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='users'").fetchone())
     except sqlite3.Error: return False
 
+def drain_seed_queue() -> dict:
+    client = _redis()
+    if client is None: return {"processed": 0, "pending": 0, "mode": "local"}
+    processed = 0
+    while True:
+        raw = client.lpop(QUEUE_KEY)
+        if not raw: break
+        job = json.loads(raw); job_id = job["job_id"]
+        if client.get(DONE_PREFIX + job_id): continue
+        path = os.getenv("MOCK_DB_PATH", "data/local.db")
+        if not _database_ready(path):
+            from scripts.create_sample_db import main
+            main()
+        client.set(DONE_PREFIX + job_id, "1", ex=60 * 60 * 24 * 30)
+        processed += 1
+    return {"processed": processed, "pending": int(client.llen(QUEUE_KEY))}
