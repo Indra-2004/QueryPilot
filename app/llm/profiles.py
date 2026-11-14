@@ -45,3 +45,10 @@ def get_profile(provider_id: str, owner_id: str = "default") -> ProviderProfile 
         model=record["model"], base_url=(__import__("app.llm.client", fromlist=["decrypt_secret"]).decrypt_secret(record["encrypted_base_url"]) if record.get("encrypted_base_url") else None),
         enabled=record.get("enabled", True))
 
+def list_profiles(owner_id: str = "default") -> list[dict]:
+    with Session(metadata_engine()) as session:
+        records = []
+        for row in session.scalars(select(ProviderProfileRecord).where(ProviderProfileRecord.owner_id == owner_id)).all():
+            record = row.__dict__.copy(); record.pop("_sa_instance_state", None); records.append(record)
+    return [provider_metadata(r) for r in records]
+
