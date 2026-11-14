@@ -106,3 +106,12 @@ def health():
     """Lightweight liveness probe used by Render and external monitors."""
     return {"status": "ok", "service": "nerfsql"}
 
+@app.get("/ready", tags=["Utility"])
+def ready():
+    return {"status": "ready"}
+
+@app.post("/jobs/seed", tags=["Jobs"])
+def seed_job():
+    """Queue a rebuildable demo dataset; the job is safe to retry."""
+    return enqueue_seed()
+
