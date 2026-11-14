@@ -150,3 +150,22 @@ def create_connection(req: ConnectionRequest):
         raise HTTPException(status_code=400, detail=str(exc))
 
 
+def _index_connection_schema(connection_id: str) -> dict:
+    engine = connections.get_connection_engine(connection_id, owner_id="default")
+    chunks = extract_schema_from_engine(engine)
+    namespace = connection_schema_namespace(connection_id)
+    if not settings.pinecone_api_key:
+        return {"status": "disabled", "tables": len(chunks), "namespace": namespace}
+    try:
+        count = upsert_schema_chunks_to_pinecone(
+            chunks=chunks,
+            index_name=settings.pinecone_index_name,
+            namespace=namespace,
+            region=settings.pinecone_region,
+            api_key=settings.pinecone_api_key,
+        )
+        return {"status": "indexed", "tables": count, "namespace": namespace}
+    except Exception:
+        return {"status": "failed", "tables": len(chunks), "namespace": namespace}
+
+
