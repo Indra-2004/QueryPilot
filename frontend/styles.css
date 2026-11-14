@@ -8,3 +8,5 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;b
 .brand{font-size:18px;margin:0 8px 64px}.brand-mark{width:32px;height:32px;border-radius:10px;box-shadow:0 0 0 6px var(--accent-soft)}
 .nav{border:1px solid transparent;transition:transform .2s ease,background .2s ease,border-color .2s ease}.nav:hover{transform:translateX(3px);border-color:#30434a;background:#152126}.nav.active{background:linear-gradient(90deg,#172b2b,#142024);border-color:#35544f;box-shadow:inset 3px 0 var(--accent)}
 .main{padding-top:42px}.topbar{margin-bottom:42px}.topbar h1{font-size:36px;font-weight:700}.eyebrow{color:var(--accent);opacity:.8}
+.panel{background:linear-gradient(145deg,rgba(21,30,33,.96),rgba(13,19,22,.96));border:1px solid #2a3a40;border-radius:20px;box-shadow:0 24px 60px -38px rgba(0,0,0,.9),inset 0 1px rgba(255,255,255,.04);transition:border-color .2s ease,transform .2s ease}.panel:hover{border-color:#3c595a}
+.prompt-panel,.result-panel{padding:28px;min-height:470px}.schema-panel{padding:24px 28px}
