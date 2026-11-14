@@ -31,3 +31,20 @@ def _normalize_sql(sql: str) -> str:
     cleaned = re.sub(r"''([^']+)''", r"'\1'", cleaned)
     return cleaned.strip()
 
+class AgentState(TypedDict):
+    question: str
+    schema: str
+    sql: str
+    result: Optional[list]
+    error: Optional[str]
+    retries: int
+    # Optional selections carried through the graph for multi-tenant execution.
+    connection_id: Optional[str]
+    provider_id: Optional[str]
+    model: Optional[str]
+    input_tokens: int
+    output_tokens: int
+    llm_calls: int
+    llm_latency_ms: float
+
+
