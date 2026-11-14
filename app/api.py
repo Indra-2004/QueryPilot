@@ -86,3 +86,14 @@ class ProviderRequest(BaseModel):
     model: str
     base_url: str | None = None
 
+class ConnectionRequest(BaseModel):
+    name: str
+    db_uri: str
+    provider_id: str | None = None
+
+class IngestRequest(BaseModel):
+    db_uri: str | None = None  # defaults to DB_URI from .env if omitted
+
+    model_config = {"json_schema_extra": {"examples": [{"db_uri": "postgresql://user:pass@localhost/mydb"}]}}
+
+
