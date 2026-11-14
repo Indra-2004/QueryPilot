@@ -129,3 +129,20 @@ def test_connection(uri: str, *, allow_private_hosts: bool = False) -> dict[str,
         engine.dispose()
 
 
+def create_profile(*, owner_id: str, name: str, uri: str, provider_id: str | None = None,
+                   allow_private_hosts: bool = False, test: bool = True) -> dict[str, Any]:
+    if not owner_id:
+        raise ConnectionError("owner_id is required")
+    if not name or len(name) > 120:
+        raise ConnectionError("Connection name must be 1-120 characters")
+    validated = _validate_uri(uri, allow_private_hosts=allow_private_hosts)
+    health = test_connection(validated, allow_private_hosts=allow_private_hosts) if test else {"status": "unchecked"}
+    profile = ConnectionProfile(connection_id=str(uuid4()), owner_id=owner_id, name=name.strip(),
+                                dialect=_dialect(validated), encrypted_uri=_fernet().encrypt(validated.encode()).decode(),
+                                provider_id=provider_id, last_health_check=datetime.now(timezone.utc) if test else None)
+    with Session(metadata_engine(), expire_on_commit=False) as session:
+        session.add(profile)
+        session.commit()
+    return profile_public(profile) | {"health": health}
+
+
