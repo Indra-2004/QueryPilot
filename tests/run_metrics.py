@@ -58,3 +58,29 @@ def tables_in_sql(sql: str) -> set[str]:
     return {name.lower() for name in re.findall(r"(?:from|join)\s+([a-zA-Z_][\w.]*)", sql, re.I)}
 
 
+def score_case(case: dict, response: dict, status: int) -> dict:
+    sql = response.get("sql", "") or ""
+    error = response.get("error") or response.get("detail")
+    rows = response.get("result") or []
+    used_tables = {name.split(".")[-1] for name in tables_in_sql(sql)}
+    hallucinated_tables = sorted(used_tables - ALLOWED_TABLES)
+    if case.get("unanswerable"):
+        correct = bool(error) and not rows
+        hallucination = bool(rows) or bool(hallucinated_tables)
+    else:
+        expected_tables = set(case.get("expected_tables", []))
+        tables_ok = expected_tables.issubset(used_tables)
+        blob = normalized_blob(rows)
+        values_ok = all(str(value).lower().replace(".0", "") in blob for value in case.get("expected_values", []))
+        row_limit_ok = "max_rows" not in case or len(rows) <= case["max_rows"]
+        correct = status == 200 and not error and tables_ok and values_ok and row_limit_ok
+        hallucination = bool(hallucinated_tables)
+    return {
+        "correct": correct,
+        "hallucination": hallucination,
+        "hallucinated_tables": hallucinated_tables,
+        "used_tables": sorted(used_tables),
+        "error": error,
+    }
+
+
