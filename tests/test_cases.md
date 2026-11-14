@@ -128,3 +128,25 @@
 
 ---
 
+## Error-Correction Loop Tests
+
+### 14. Nonexistent Column Wording
+**Question:** Show user phone numbers
+
+**Expected:**
+- First SQL may fail due to missing `phone` column
+- Correction loop triggers retries
+- Ends with corrected valid query or safe error message
+
+---
+
+### 15. Ambiguous Wording
+**Question:** Show carbon score per family
+
+**Expected:**
+- System maps "family" → `household`
+- Uses household-related tables
+- Handles retry if first attempt is wrong
+
+---
+
