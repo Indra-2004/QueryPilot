@@ -169,3 +169,9 @@ def _index_connection_schema(connection_id: str) -> dict:
         return {"status": "failed", "tables": len(chunks), "namespace": namespace}
 
 
+@app.post("/connections/{connection_id}/schema/ingest", tags=["Schema"])
+def ingest_connection_schema(connection_id: str):
+    if not connections.get_profile(connection_id, "default"):
+        raise HTTPException(status_code=404, detail="Connection not found")
+    return _index_connection_schema(connection_id)
+
