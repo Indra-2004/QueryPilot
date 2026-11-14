@@ -125,3 +125,13 @@ def create_provider(req: ProviderRequest):
     except (ValueError, ProviderError) as exc:
         raise HTTPException(status_code=400, detail=str(exc))
 
+@app.get("/providers", tags=["Providers"])
+def list_providers():
+    return {"providers": provider_profiles.list_profiles()}
+
+@app.get("/providers/{provider_id}", tags=["Providers"])
+def get_provider(provider_id: str):
+    profile = next((p for p in provider_profiles.list_profiles() if p["provider_id"] == provider_id), None)
+    if not profile: raise HTTPException(status_code=404, detail="Provider not found")
+    return profile
+
