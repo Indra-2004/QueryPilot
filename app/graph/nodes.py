@@ -114,3 +114,17 @@ def validate_sql_semantic(state: AgentState) -> AgentState:
         }
     return state
 
+def validate_and_execute(state: AgentState) -> AgentState:
+    # Skip execution if there's already a validation error
+    if state.get("error"):
+        return state
+
+    sql = state["sql"]
+    if not is_safe(sql):
+        return {**state, "error": "Blocked: destructive SQL detected", "result": None}
+    try:
+        result = execute_query(sql, connection_id=state.get("connection_id"))
+        return {**state, "result": result, "error": None}
+    except Exception as e:
+        return {**state, "error": str(e), "result": None}
+
