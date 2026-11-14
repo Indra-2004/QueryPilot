@@ -26,3 +26,23 @@ def _get_retriever():
         _retriever = SchemaRetriever()
     return _retriever
 
+def _schema_for_query(question: str, connection_id: Optional[str], schema_strategy: str = "rag") -> str:
+    if connection_id:
+        if schema_strategy == "full":
+            engine = get_connection_engine(connection_id, owner_id="default")
+            return "\n".join(extract_schema_from_engine(engine))
+        # Search only the selected connection's vector namespace. Never reuse
+        # the deployment-wide namespace, which may describe a different DB.
+        retrieved = _get_retriever().retrieve(
+            question,
+            namespace=connection_schema_namespace(connection_id),
+            allow_local_fallback=False,
+        )
+        if retrieved:
+            return retrieved
+        # Pinecone is optional, and a newly added connection may still be
+        # indexing. Live introspection keeps queries correct in either case.
+        engine = get_connection_engine(connection_id, owner_id="default")
+        return "\n".join(extract_schema_from_engine(engine))
+    return _get_retriever().retrieve(question)
+
