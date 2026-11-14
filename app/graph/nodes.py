@@ -89,3 +89,28 @@ def _get_available_tables(schema: str) -> list:
     matches = re.findall(pattern, schema)
     return [m.lower() for m in matches]
 
+def validate_sql_semantic(state: AgentState) -> AgentState:
+    """Validate that generated SQL is semantically appropriate for the question."""
+    sql = state["sql"]
+    available_tables = _get_available_tables(state["schema"])
+
+    llm = get_llm(provider_id=state.get("provider_id"), model=state.get("model"))
+    prompt = VALIDATE_PROMPT.format(
+        available_tables=", ".join(available_tables),
+        question=state["question"],
+        sql=sql,
+    )
+    started = time.perf_counter()
+    llm_response = llm.invoke([HumanMessage(content=prompt)])
+    state = _record_llm_usage(state, llm_response, (time.perf_counter() - started) * 1000)
+    response = llm_response.content.strip().upper()
+
+    if "INVALID" in response:
+        return {
+            **state,
+            "sql": "",  # Clear SQL on validation failure
+            "error": f"Cannot answer this question: the requested data does not exist in the database or is not relevant to the available schema.",
+            "result": None
+        }
+    return state
+
