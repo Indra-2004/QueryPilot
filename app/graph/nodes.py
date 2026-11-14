@@ -62,3 +62,16 @@ def _record_llm_usage(state: AgentState, response, elapsed_ms: float) -> AgentSt
         "llm_latency_ms": round(state.get("llm_latency_ms", 0.0) + elapsed_ms, 2),
     }
 
+def generate_sql(state: AgentState) -> AgentState:
+    llm = get_llm(provider_id=state.get("provider_id"), model=state.get("model"))
+    prompt = GENERATE_PROMPT.format(
+        schema_toon=schema_text_to_toon(state["schema"]),
+        question=state["question"],
+    )
+    started = time.perf_counter()
+    response = llm.invoke([HumanMessage(content=prompt)])
+    state = _record_llm_usage(state, response, (time.perf_counter() - started) * 1000)
+    raw = response.content
+    sql = _normalize_sql(extract_sql_from_toon(raw))
+    return {**state, "sql": sql, "error": None}
+
