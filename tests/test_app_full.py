@@ -13,7 +13,7 @@ class FullAppApiTests(unittest.TestCase):
         import scripts.create_sample_db as sample_db
 
         sample_db.main()
-        cls.client = TestClient(app)
+        cls.client = TestClient(app, base_url="http://localhost")
 
     def test_health(self):
         response = self.client.get("/health")
