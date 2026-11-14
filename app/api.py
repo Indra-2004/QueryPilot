@@ -185,3 +185,19 @@ def get_connection(connection_id: str):
     if not profile: raise HTTPException(status_code=404, detail="Connection not found")
     return connections.profile_public(profile)
 
+@app.delete("/connections/{connection_id}", tags=["Connections"])
+def delete_connection(connection_id: str):
+    if not connections.get_profile(connection_id, "default"):
+        raise HTTPException(status_code=404, detail="Connection not found")
+    if settings.pinecone_api_key:
+        try:
+            delete_pinecone_namespace(
+                settings.pinecone_index_name,
+                connection_schema_namespace(connection_id),
+                settings.pinecone_api_key,
+            )
+        except Exception:
+            pass
+    if not connections.delete_profile(connection_id, "default"): raise HTTPException(status_code=404, detail="Connection not found")
+    return {"deleted": True, "connection_id": connection_id}
+
