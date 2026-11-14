@@ -38,3 +38,16 @@ class ResponseRecord:
     model: Optional[str] = None
 
 
+@dataclass
+class ChatSession:
+    """Represents a single conversation session."""
+    chat_id: str
+    created_at: datetime
+    first_query: QueryRecord
+    queries: deque = field(default_factory=lambda: deque(maxlen=4))  # Last 4 queries
+    responses: deque = field(default_factory=lambda: deque(maxlen=4))  # Last 4 responses
+    connection_id: Optional[str] = None
+    provider_id: Optional[str] = None
+    model: Optional[str] = None
+
+
