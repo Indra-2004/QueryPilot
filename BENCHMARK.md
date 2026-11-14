@@ -38,3 +38,24 @@ The runner writes:
 
 Provider free-tier rate limits can interrupt a complete run. The runner backs off on HTTP 429 responses. Increase `--delay`, keep the JSON evidence, and rerun when the quota resets. Provider failures are evidence of an incomplete run, never accuracy or hallucination results.
 
+## Free infrastructure load test
+
+Install development dependencies:
+
+```powershell
+.\venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```
+
+Run 100 virtual users against lightweight endpoints:
+
+```powershell
+.\venv\Scripts\locust.exe -f tests\locustfile.py `
+  --headless --users 100 --spawn-rate 10 --run-time 2m `
+  --host https://nerfsql-demo.onrender.com `
+  --csv benchmark-results\load
+```
+
+This load test supports claims about API and schema endpoint concurrency. It does not support a claim that 100 concurrent LLM queries complete below 200 ms.
+
+For a small LLM-query load test, set `BENCHMARK_CONNECTION_ID` and `LOCUST_QUERY_TEST=1`, then use two to five users. Watch the provider's free-tier limits.
+
