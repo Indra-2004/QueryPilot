@@ -50,3 +50,11 @@ def run_query_with_backoff(base_url: str, payload: dict, max_attempts: int) -> t
     return status, response, round((time.perf_counter() - total_started) * 1000, 2)
 
 
+def normalized_blob(rows: list) -> str:
+    return json.dumps(rows, sort_keys=True, default=str).lower().replace(".0", "")
+
+
+def tables_in_sql(sql: str) -> set[str]:
+    return {name.lower() for name in re.findall(r"(?:from|join)\s+([a-zA-Z_][\w.]*)", sql, re.I)}
+
+
