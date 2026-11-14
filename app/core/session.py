@@ -24,3 +24,17 @@ class QueryRecord:
     model: Optional[str] = None
 
 
+@dataclass
+class ResponseRecord:
+    """Represents a response from the query agent."""
+    timestamp: datetime
+    sql: str
+    sql_raw: str
+    result: Optional[list]
+    error: Optional[str]
+    retries: int
+    connection_id: Optional[str] = None
+    provider_id: Optional[str] = None
+    model: Optional[str] = None
+
+
