@@ -20,3 +20,9 @@ def _get_graph():
         _graph = build_graph()
     return _graph
 
+def _get_retriever():
+    global _retriever
+    if _retriever is None:
+        _retriever = SchemaRetriever()
+    return _retriever
+
