@@ -86,3 +86,29 @@ def metadata_engine() -> Engine:
         return _metadata_engine
 
 
+def _validate_uri(uri: str, *, allow_private_hosts: bool = False) -> str:
+    if not uri or not uri.strip():
+        raise ConnectionError("Database URI is required")
+    try:
+        parsed = make_url(uri)
+    except Exception as exc:
+        raise ConnectionError("Invalid database URI") from exc
+    if parsed.drivername.split("+")[0] not in ALLOWED_DIALECTS:
+        raise ConnectionError("Supported database types are SQLite, PostgreSQL, and MySQL")
+    if parsed.drivername == "sqlite" or parsed.drivername.startswith("sqlite+"):
+        return uri
+    host = parsed.host
+    if not host:
+        raise ConnectionError("Database URI must include a host")
+    if not allow_private_hosts:
+        try:
+            addresses = {item[4][0] for item in socket.getaddrinfo(host, parsed.port or 0, type=socket.SOCK_STREAM)}
+            for address in addresses:
+                ip = ipaddress.ip_address(address)
+                if ip.is_loopback or ip.is_private or ip.is_link_local or ip.is_reserved or ip.is_unspecified:
+                    raise ConnectionError("Private or local database hosts are not allowed")
+        except socket.gaierror as exc:
+            raise ConnectionError("Database host could not be resolved") from exc
+    return uri
+
+
