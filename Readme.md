@@ -1,4 +1,4 @@
-# NerfSQL
+# QueryPilot
 
 **Schema-aware, self-correcting Text-to-SQL pipeline using LangGraph + Groq**
 
@@ -6,7 +6,7 @@
 
 ## Overview
 
-NerfSQL is a schema-aware text-to-SQL system that converts natural language queries into executable SQL, validates them against a live database, and iteratively corrects errors until a valid result is produced.
+QueryPilot is a schema-aware text-to-SQL system that converts natural language queries into executable SQL, validates them against a live database, and iteratively corrects errors until a valid result is produced.
 
 The system uses:
 
@@ -122,7 +122,7 @@ Correction Loop (LLM)
 ## Project Structure
 
 ```
-NerfSQL/
+QueryPilot/
 │
 ├── app/
 │   ├── graph/              # LangGraph nodes and edges
