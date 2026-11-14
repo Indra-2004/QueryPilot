@@ -115,3 +115,13 @@ def seed_job():
     """Queue a rebuildable demo dataset; the job is safe to retry."""
     return enqueue_seed()
 
+@app.post("/providers", tags=["Providers"])
+def create_provider(req: ProviderRequest):
+    try:
+        profile = provider_profiles.create_profile(owner_id="default", **req.model_dump())
+        # Construction validates provider type and local configuration without making a paid call.
+        get_llm(profile=provider_profiles.get_profile(profile["provider_id"]))
+        return profile
+    except (ValueError, ProviderError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
