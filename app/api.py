@@ -135,3 +135,18 @@ def get_provider(provider_id: str):
     if not profile: raise HTTPException(status_code=404, detail="Provider not found")
     return profile
 
+@app.delete("/providers/{provider_id}", tags=["Providers"])
+def delete_provider(provider_id: str):
+    if not provider_profiles.delete_profile(provider_id): raise HTTPException(status_code=404, detail="Provider not found")
+    return {"deleted": True, "provider_id": provider_id}
+
+@app.post("/connections", tags=["Connections"])
+def create_connection(req: ConnectionRequest):
+    try:
+        profile = connections.create_profile(owner_id="default", name=req.name, uri=req.db_uri, provider_id=req.provider_id)
+        profile["schema_index"] = _index_connection_schema(profile["connection_id"])
+        return profile
+    except connections.ConnectionError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
+
