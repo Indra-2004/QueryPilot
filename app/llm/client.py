@@ -100,3 +100,6 @@ def get_llm(provider_id: str | None = None, model: str | None = None, profile: P
         kwargs["anthropic_api_key"] = kwargs.pop("api_key"); return ChatAnthropic(**kwargs)
     raise ProviderError("unsupported_provider", p.provider_type)
 
+def provider_metadata(profile: ProviderProfile | Mapping[str, Any]) -> dict[str, Any]:
+    p = profile if isinstance(profile, ProviderProfile) else _profile_from_mapping(profile)
+    return {"provider_id": p.provider_id, "owner_id": p.owner_id, "name": p.name, "provider_type": p.provider_type, "model": p.model, "enabled": p.enabled, "base_url": p.base_url}
