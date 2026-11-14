@@ -213,3 +213,38 @@ This will:
 
 ---
 
+## Usage
+
+### Run Query
+
+```python
+from app.main import query_agent
+
+response = query_agent(
+    question="Get top 5 customers by revenue in last 3 months"
+)
+
+print(response.sql)
+print(response.result)
+```
+
+---
+
+### Example Flow
+
+**Input:**
+
+```
+"Show total travel emissions per user in April 2026"
+```
+
+**System:**
+
+1. Retrieves relevant tables (`travel_entries`, `users`, `emission_factors`)
+2. Generates SQL
+3. Executes → error (wrong column)
+4. Corrects query
+5. Executes successfully
+
+---
+
