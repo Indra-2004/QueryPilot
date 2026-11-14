@@ -85,3 +85,15 @@ def extract_sql_from_toon(raw_output: str) -> str:
     return text
 
 
+def _strip_code_fence(value: str) -> str:
+    cleaned = value.strip()
+    if cleaned.startswith("```"):
+        parts = cleaned.splitlines()
+        if parts and parts[0].startswith("```"):
+            parts = parts[1:]
+        if parts and parts[-1].strip() == "```":
+            parts = parts[:-1]
+        return "\n".join(parts).strip()
+    return cleaned
+
+
