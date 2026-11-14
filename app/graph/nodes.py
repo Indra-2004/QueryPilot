@@ -82,3 +82,10 @@ def _extract_tables_from_sql(sql: str) -> list:
     matches = re.findall(pattern, sql, re.IGNORECASE)
     return [m.lower() for m in matches]
 
+def _get_available_tables(schema: str) -> list:
+    """Extract available table names from schema text."""
+    # Schema format: "Table: table_name\nColumns: ..."
+    pattern = r'Table:\s+(\w+)'
+    matches = re.findall(pattern, schema)
+    return [m.lower() for m in matches]
+
