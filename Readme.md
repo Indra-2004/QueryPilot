@@ -78,3 +78,33 @@ The system uses:
 
 ---
 
+## Architecture
+
+```
+User Query
+   │
+   ▼
+Schema Retriever (Vector DB)
+   │
+   ▼
+SQL Generator (LLM)
+   │
+   ▼
+Pre-Execution Validator
+   │
+   ▼
+SQL Execution (DB)
+   │
+   ├── Success ───────────────► Return Result
+   │
+   ▼
+Error Parser
+   │
+   ▼
+Correction Loop (LLM)
+   │
+   └── Retry (bounded)
+```
+
+---
+
