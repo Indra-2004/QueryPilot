@@ -51,3 +51,16 @@ class ConnectionProfile(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
 
+def _fernet() -> Fernet:
+    raw = os.environ.get("SECRETS_ENCRYPTION_KEY") or os.environ.get("CONNECTION_ENCRYPTION_KEY")
+    if not raw:
+        # Development fallback is intentionally process-stable only. Production
+        # must provide a key or profiles cannot be recovered after restart.
+        raw = Fernet.generate_key().decode()
+        os.environ["SECRETS_ENCRYPTION_KEY"] = raw
+    try:
+        return Fernet(raw.encode() if isinstance(raw, str) else raw)
+    except Exception as exc:
+        raise ConnectionError("SECRETS_ENCRYPTION_KEY must be a valid Fernet key") from exc
+
+
