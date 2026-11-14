@@ -302,3 +302,19 @@ Metrics:
 
 ---
 
+## Why This Project Exists
+
+Most text-to-SQL demos fail because they:
+
+- ignore schema scale
+- lack validation
+- rely on single-pass generation
+
+This project focuses on:
+
+- **correctness over novelty**
+- **bounded autonomy over blind generation**
+- **real execution over synthetic examples**
+
+---
+
