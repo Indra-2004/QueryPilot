@@ -32,3 +32,12 @@ app = FastAPI(title="SQL-RAG Agent", description="Natural language to SQL agent 
 logger = logging.getLogger("nerfsql.api")
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
+@app.on_event("startup")
+def drain_startup_seed_queue():
+    """Replay durable seed jobs after a container restart."""
+    try:
+        drain_seed_queue()
+    except Exception:
+        # The API remains available if Upstash is temporarily unreachable.
+        pass
+
