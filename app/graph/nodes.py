@@ -148,3 +148,7 @@ def correct_sql(state: AgentState) -> AgentState:
         "retries": state["retries"] + 1,
     }
 
+def should_retry(state: AgentState) -> str:
+    if state.get("error") and state["retries"] < MAX_RETRIES:
+        return "correct"
+    return "end"
