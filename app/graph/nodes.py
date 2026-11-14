@@ -75,3 +75,10 @@ def generate_sql(state: AgentState) -> AgentState:
     sql = _normalize_sql(extract_sql_from_toon(raw))
     return {**state, "sql": sql, "error": None}
 
+def _extract_tables_from_sql(sql: str) -> list:
+    """Extract table names from SQL query."""
+    # Match FROM and JOIN clauses
+    pattern = r'(?:FROM|JOIN)\s+(\w+)'
+    matches = re.findall(pattern, sql, re.IGNORECASE)
+    return [m.lower() for m in matches]
+
