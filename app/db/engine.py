@@ -42,3 +42,7 @@ def get_engine(connection_id: str | None = None, *, owner_id: str | None = None)
             ) from last_error
     return _engine
 
+def execute_query(sql: str, connection_id: str | None = None, *, owner_id: str | None = None) -> list[dict]:
+    with get_engine(connection_id, owner_id=owner_id).connect() as conn:
+        result = conn.execute(text(sql))
+        return [dict(row._mapping) for row in result]
