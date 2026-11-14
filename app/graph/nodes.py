@@ -128,3 +128,23 @@ def validate_and_execute(state: AgentState) -> AgentState:
     except Exception as e:
         return {**state, "error": str(e), "result": None}
 
+def correct_sql(state: AgentState) -> AgentState:
+    llm = get_llm(provider_id=state.get("provider_id"), model=state.get("model"))
+    prompt = CORRECT_PROMPT.format(
+        sql=state["sql"],
+        error=state["error"],
+        schema_toon=schema_text_to_toon(state["schema"]),
+    )
+    started = time.perf_counter()
+    response = llm.invoke([HumanMessage(content=prompt)])
+    state = _record_llm_usage(state, response, (time.perf_counter() - started) * 1000)
+    raw = response.content
+    sql = _normalize_sql(extract_sql_from_toon(raw))
+    return {
+        **state,
+        "sql": sql,
+        "error": None,
+        "result": None,
+        "retries": state["retries"] + 1,
+    }
+
