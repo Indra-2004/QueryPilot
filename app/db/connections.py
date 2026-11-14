@@ -73,3 +73,16 @@ def _store_engine() -> Engine:
     return engine
 
 
+_metadata_engine: Engine | None = None
+_engines: dict[str, Engine] = {}
+_lock = RLock()
+
+
+def metadata_engine() -> Engine:
+    global _metadata_engine
+    with _lock:
+        if _metadata_engine is None:
+            _metadata_engine = _store_engine()
+        return _metadata_engine
+
+
