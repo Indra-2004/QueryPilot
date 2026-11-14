@@ -59,3 +59,6 @@ This load test supports claims about API and schema endpoint concurrency. It doe
 
 For a small LLM-query load test, set `BENCHMARK_CONNECTION_ID` and `LOCUST_QUERY_TEST=1`, then use two to five users. Watch the provider's free-tier limits.
 
+## Claim rules
+
+Only publish a metric produced by a completed report. State the tested model and dataset. End-to-end `/query` latency must be reported separately from `/health`, `/connections`, and `/schema` latency.
