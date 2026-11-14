@@ -79,3 +79,10 @@ class QueryRequest(BaseModel):
     model: str | None = None
     schema_strategy: Literal["rag", "full"] = "rag"
 
+class ProviderRequest(BaseModel):
+    name: str
+    provider_type: str
+    api_key: str
+    model: str
+    base_url: str | None = None
+
