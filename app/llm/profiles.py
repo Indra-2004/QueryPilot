@@ -52,3 +52,8 @@ def list_profiles(owner_id: str = "default") -> list[dict]:
             record = row.__dict__.copy(); record.pop("_sa_instance_state", None); records.append(record)
     return [provider_metadata(r) for r in records]
 
+def delete_profile(provider_id: str, owner_id: str = "default") -> bool:
+    with Session(metadata_engine()) as session:
+        row = session.scalar(select(ProviderProfileRecord).where(ProviderProfileRecord.provider_id == provider_id, ProviderProfileRecord.owner_id == owner_id))
+        if not row: return False
+        session.delete(row); session.commit(); return True
