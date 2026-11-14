@@ -68,3 +68,59 @@ def _list_index_names(pc: Pinecone) -> set[str]:
     return names
 
 
+def upsert_schema_chunks_to_pinecone(
+    chunks: list[str],
+    index_name: str,
+    namespace: str,
+    region: str,
+    api_key: str,
+) -> int:
+    if not chunks:
+        return 0
+
+    model = TextEmbedding(EMBEDDING_MODEL)
+    embeddings = np.array(list(model.embed(chunks)), dtype=np.float32)
+    dimension = int(embeddings.shape[1])
+
+    pc = Pinecone(api_key=api_key)
+    if index_name not in _list_index_names(pc):
+        pc.create_index(
+            name=index_name,
+            dimension=dimension,
+            metric="cosine",
+            spec=ServerlessSpec(cloud="aws", region=region),
+        )
+
+    for _ in range(30):
+        status = pc.describe_index(index_name).status
+        ready = status.get("ready") if isinstance(status, dict) else getattr(status, "ready", False)
+        if ready:
+            break
+        time.sleep(1)
+    else:
+        raise RuntimeError(f"Pinecone index '{index_name}' is not ready")
+
+    index = pc.Index(index_name)
+    try:
+        # A refresh must remove vectors for tables that were renamed or dropped.
+        index.delete(delete_all=True, namespace=namespace)
+    except Exception:
+        # Pinecone may report an absent namespace on the first ingestion.
+        pass
+    vectors = []
+    for i, (chunk, emb) in enumerate(zip(chunks, embeddings, strict=False)):
+        vectors.append(
+            {
+                "id": f"schema-{i}",
+                "values": emb.tolist(),
+                "metadata": {"chunk": chunk},
+            }
+        )
+
+    batch_size = 100
+    for start in range(0, len(vectors), batch_size):
+        index.upsert(vectors=vectors[start : start + batch_size], namespace=namespace)
+
+    return len(vectors)
+
+
