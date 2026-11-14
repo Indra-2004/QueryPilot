@@ -6,3 +6,5 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.035;b
 .shell{grid-template-columns:272px minmax(0,1fr)}
 .sidebar{background:rgba(10,15,17,.72);backdrop-filter:blur(18px);border-right:1px solid #304148;padding:30px 20px 22px}
 .brand{font-size:18px;margin:0 8px 64px}.brand-mark{width:32px;height:32px;border-radius:10px;box-shadow:0 0 0 6px var(--accent-soft)}
+.nav{border:1px solid transparent;transition:transform .2s ease,background .2s ease,border-color .2s ease}.nav:hover{transform:translateX(3px);border-color:#30434a;background:#152126}.nav.active{background:linear-gradient(90deg,#172b2b,#142024);border-color:#35544f;box-shadow:inset 3px 0 var(--accent)}
+.main{padding-top:42px}.topbar{margin-bottom:42px}.topbar h1{font-size:36px;font-weight:700}.eyebrow{color:var(--accent);opacity:.8}
