@@ -29,3 +29,21 @@ except ModuleNotFoundError:
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
 
+def connection_schema_namespace(connection_id: str) -> str:
+    """Keep every saved database in an isolated Pinecone namespace."""
+    return f"connection-{connection_id}"
+
+def extract_schema_from_engine(engine: Engine) -> list[str]:
+    """Return schema chunks for an already configured database engine."""
+    inspector = inspect(engine)
+    chunks = []
+    for table in inspector.get_table_names():
+        cols = [c["name"] for c in inspector.get_columns(table)]
+        fks = [f"{fk['constrained_columns']} -> {fk['referred_table']}" for fk in inspector.get_foreign_keys(table)]
+        chunk = f"Table: {table}\nColumns: {', '.join(cols)}"
+        if fks:
+            chunk += f"\nForeign keys: {'; '.join(fks)}"
+        chunks.append(chunk)
+    return chunks
+
+
