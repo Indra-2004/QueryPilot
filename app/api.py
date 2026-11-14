@@ -338,3 +338,9 @@ def query(req: QueryRequest, chat_id: str | None = Query(None)):
 
     return response_data
 
+@app.get("/history", summary="List all active chat sessions", tags=["History"])
+def history():
+    """Returns metadata for all active chat sessions."""
+    sessions = _session_manager.list_sessions()
+    return {"chats": sessions}
+
