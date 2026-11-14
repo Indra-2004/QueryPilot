@@ -7,3 +7,13 @@ from pathlib import Path
 QUEUE_KEY = os.getenv("SEED_QUEUE_KEY", "nerfsql:seed:queue")
 DONE_PREFIX = os.getenv("SEED_DONE_PREFIX", "nerfsql:seed:done:")
 
+def _redis():
+    url = os.getenv("UPSTASH_REDIS_URL") or os.getenv("REDIS_URL")
+    if not url:
+        return None
+    try:
+        import redis
+        return redis.Redis.from_url(url, decode_responses=True)
+    except Exception:
+        return None
+
