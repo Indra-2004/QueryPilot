@@ -344,3 +344,10 @@ def history():
     sessions = _session_manager.list_sessions()
     return {"chats": sessions}
 
+@app.get("/history/{chat_id}", summary="Get conversation history for a chat", tags=["History"])
+def history_detail(chat_id: str):
+    """Returns the full conversation history (first query + last 4 queries + last 4 responses)."""
+    history = _session_manager.get_chat_history(chat_id)
+    if history is None:
+        raise HTTPException(status_code=404, detail=f"Chat {chat_id} not found")
+    return history
