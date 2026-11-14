@@ -63,3 +63,56 @@ class QueryResponse:
     llm_latency_ms: float = 0.0
     total_latency_ms: float = 0.0
 
+def query_agent(question: str, chat_id: Optional[str] = None, connection_id: Optional[str] = None,
+                provider_id: Optional[str] = None, model: Optional[str] = None,
+                schema_strategy: str = "rag") -> QueryResponse:
+    started = time.perf_counter()
+    if schema_strategy not in {"rag", "full"}:
+        raise ValueError("schema_strategy must be 'rag' or 'full'")
+    # Create new session if chat_id not provided, otherwise use existing
+    if chat_id is None:
+        chat_id = _session_manager.create_session(question, connection_id, provider_id, model)
+    else:
+        existing = _session_manager.get_session(chat_id)
+        if existing:
+            connection_id = connection_id or existing.connection_id
+            provider_id = provider_id or existing.provider_id
+            model = model or existing.model
+        _session_manager.add_query(chat_id, question, connection_id=connection_id,
+                                   provider_id=provider_id, model=model)
+
+    schema = _schema_for_query(question, connection_id, schema_strategy)
+    state = {"question": question, "schema": schema, "sql": "", "result": None,
+             "error": None, "retries": 0, "connection_id": connection_id,
+             "provider_id": provider_id, "model": model,
+             "input_tokens": 0, "output_tokens": 0, "llm_calls": 0,
+             "llm_latency_ms": 0.0}
+    final = _get_graph().invoke(state)
+
+    # Record response to session
+    _session_manager.add_response(
+        chat_id=chat_id,
+        sql=final["sql"],
+        sql_raw=final["sql"],
+        result=final["result"],
+        error=final["error"],
+        retries=final["retries"],
+        connection_id=final.get("connection_id"), provider_id=final.get("provider_id"),
+        model=final.get("model"),
+        schema_strategy=schema_strategy,
+        input_tokens=final.get("input_tokens", 0),
+        output_tokens=final.get("output_tokens", 0),
+        llm_calls=final.get("llm_calls", 0),
+        llm_latency_ms=final.get("llm_latency_ms", 0.0),
+        total_latency_ms=round((time.perf_counter() - started) * 1000, 2),
+    )
+
+    return QueryResponse(
+        sql=final["sql"],
+        result=final["result"],
+        error=final["error"],
+        retries=final["retries"],
+        chat_id=chat_id,
+        connection_id=final.get("connection_id"), provider_id=final.get("provider_id"),
+        model=final.get("model"),
+    )
