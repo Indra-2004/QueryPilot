@@ -324,3 +324,7 @@ MIT License
 
 ---
 
+## Final Note
+
+This is not a “one-shot LLM demo.”
+It is a constrained system that treats LLMs as unreliable components and compensates accordingly.
