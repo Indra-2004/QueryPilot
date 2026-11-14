@@ -28,3 +28,11 @@ ALLOWED_DIALECTS = {"sqlite", "postgresql", "mysql"}
 LOCAL_DB_URI = "sqlite:///data/local.db"
 
 
+class ConnectionError(ValueError):
+    """Raised when a connection profile is invalid or unavailable."""
+
+
+class Base(DeclarativeBase):
+    pass
+
+
