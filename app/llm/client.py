@@ -39,3 +39,11 @@ def _fernet() -> Fernet:
     try: return Fernet(key.encode())
     except Exception as exc: raise ProviderError("invalid_secrets_key", "Configured secrets key is invalid") from exc
 
+def encrypt_secret(value: str) -> str:
+    if not value: raise ValueError("secret cannot be empty")
+    return _fernet().encrypt(value.encode()).decode()
+
+def decrypt_secret(value: str) -> str:
+    try: return _fernet().decrypt(value.encode()).decode()
+    except (InvalidToken, UnicodeDecodeError) as exc: raise ProviderError("invalid_secret", "Stored provider secret cannot be decrypted") from exc
+
