@@ -283,3 +283,12 @@ Metrics:
 
 ---
 
+## Limitations
+
+- LLM hallucination still possible (reduced, not eliminated)
+- Complex joins across large schemas may degrade accuracy
+- Performance depends on schema quality and indexing
+- Groq-hosted models may struggle with deeply nested queries
+
+---
+
