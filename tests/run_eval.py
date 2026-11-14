@@ -6,7 +6,7 @@ from app.api import app
 
 
 def main() -> None:
-    client = TestClient(app)
+    client = TestClient(app, base_url="http://localhost")
 
     with open("tests/eval_queries.json", "r", encoding="utf-8") as f:
         tests = json.load(f)
