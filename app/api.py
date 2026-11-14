@@ -97,3 +97,12 @@ class IngestRequest(BaseModel):
     model_config = {"json_schema_extra": {"examples": [{"db_uri": "postgresql://user:pass@localhost/mydb"}]}}
 
 
+def _compact_sql(sql: str) -> str:
+    # Deterministic API-side formatting for JSON clients.
+    return re.sub(r"\s+", " ", (sql or "")).strip()
+
+@app.get("/health", summary="Health check", tags=["Utility"])
+def health():
+    """Lightweight liveness probe used by Render and external monitors."""
+    return {"status": "ok", "service": "nerfsql"}
+
