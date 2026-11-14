@@ -46,3 +46,20 @@ def _schema_for_query(question: str, connection_id: Optional[str], schema_strate
         return "\n".join(extract_schema_from_engine(engine))
     return _get_retriever().retrieve(question)
 
+@dataclass
+class QueryResponse:
+    sql: str
+    result: Optional[list]
+    error: Optional[str]
+    retries: int
+    chat_id: str = ""
+    connection_id: Optional[str] = None
+    provider_id: Optional[str] = None
+    model: Optional[str] = None
+    schema_strategy: str = "rag"
+    input_tokens: int = 0
+    output_tokens: int = 0
+    llm_calls: int = 0
+    llm_latency_ms: float = 0.0
+    total_latency_ms: float = 0.0
+
