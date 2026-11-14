@@ -175,3 +175,13 @@ def ingest_connection_schema(connection_id: str):
         raise HTTPException(status_code=404, detail="Connection not found")
     return _index_connection_schema(connection_id)
 
+@app.get("/connections", tags=["Connections"])
+def list_connections():
+    return {"connections": connections.list_profiles("default")}
+
+@app.get("/connections/{connection_id}", tags=["Connections"])
+def get_connection(connection_id: str):
+    profile = connections.get_profile(connection_id, "default")
+    if not profile: raise HTTPException(status_code=404, detail="Connection not found")
+    return connections.profile_public(profile)
+
