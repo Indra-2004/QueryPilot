@@ -112,3 +112,20 @@ def _validate_uri(uri: str, *, allow_private_hosts: bool = False) -> str:
     return uri
 
 
+def _dialect(uri: str) -> str:
+    return make_url(uri).drivername.split("+")[0]
+
+
+def test_connection(uri: str, *, allow_private_hosts: bool = False) -> dict[str, Any]:
+    validated = _validate_uri(uri, allow_private_hosts=allow_private_hosts)
+    engine = create_engine(validated, pool_pre_ping=True, pool_recycle=1800)
+    try:
+        with engine.connect() as conn:
+            conn.exec_driver_sql("SELECT 1")
+        return {"status": "ok", "dialect": _dialect(validated)}
+    except SQLAlchemyError as exc:
+        raise ConnectionError("Unable to connect to database") from exc
+    finally:
+        engine.dispose()
+
+
