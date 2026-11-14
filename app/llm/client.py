@@ -47,3 +47,11 @@ def decrypt_secret(value: str) -> str:
     try: return _fernet().decrypt(value.encode()).decode()
     except (InvalidToken, UnicodeDecodeError) as exc: raise ProviderError("invalid_secret", "Stored provider secret cannot be decrypted") from exc
 
+def validate_base_url(base_url: str | None) -> str | None:
+    if not base_url: return None
+    parsed = urlparse(base_url)
+    if parsed.scheme != "https" or not parsed.netloc: raise ProviderError("invalid_base_url", "Custom provider URL must be an HTTPS URL")
+    host = (parsed.hostname or "").lower()
+    if host in {"localhost", "127.0.0.1", "0.0.0.0", "::1", "169.254.169.254"} or host.endswith(".local"): raise ProviderError("unsafe_base_url", "Custom provider URL targets a private host")
+    return base_url.rstrip("/")
+
