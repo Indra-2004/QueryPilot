@@ -154,8 +154,8 @@ NerfSQL/
 ## Installation
 
 ```bash
-git clone https://github.com/sdm0p/NerfSQL.git
-cd NerfSQL
+git clone https://github.com/Indra-2004/QueryPilot.git
+cd QueryPilot
 
 python -m venv venv
 source venv/bin/activate
