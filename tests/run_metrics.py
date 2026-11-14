@@ -92,3 +92,21 @@ def percentile(values: list[float], pct: float) -> float:
     return round(ordered[index], 2)
 
 
+def summarize(rows: list[dict]) -> dict:
+    total = len(rows)
+    latencies = [row["wall_latency_ms"] for row in rows]
+    return {
+        "cases": total,
+        "correct": sum(row["correct"] for row in rows),
+        "accuracy_pct": round(100 * sum(row["correct"] for row in rows) / total, 2) if total else 0,
+        "hallucinations": sum(row["hallucination"] for row in rows),
+        "hallucination_rate_pct": round(100 * sum(row["hallucination"] for row in rows) / total, 2) if total else 0,
+        "avg_input_tokens": round(statistics.mean(row["metrics"].get("input_tokens", 0) for row in rows), 2) if total else 0,
+        "total_input_tokens": sum(row["metrics"].get("input_tokens", 0) for row in rows),
+        "avg_retries": round(statistics.mean(row.get("retries", 0) for row in rows), 2) if total else 0,
+        "p50_latency_ms": percentile(latencies, 50),
+        "p95_latency_ms": percentile(latencies, 95),
+        "p99_latency_ms": percentile(latencies, 99),
+    }
+
+
