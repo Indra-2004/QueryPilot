@@ -34,3 +34,10 @@ def enqueue_seed(dataset: str = "sustainability-demo") -> dict:
     drain_seed_queue()
     return {"queued": True, "processed": True, "job": job}
 
+def _database_ready(path: str) -> bool:
+    if not Path(path).exists(): return False
+    try:
+        with sqlite3.connect(path) as conn:
+            return bool(conn.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='users'").fetchone())
+    except sqlite3.Error: return False
+
