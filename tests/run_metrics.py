@@ -36,3 +36,17 @@ def request_json(base_url: str, path: str, payload: dict | None = None) -> tuple
         return 0, {"error": str(exc)}
 
 
+def run_query_with_backoff(base_url: str, payload: dict, max_attempts: int) -> tuple[int, dict, float]:
+    total_started = time.perf_counter()
+    status, response = 0, {}
+    for attempt in range(1, max_attempts + 1):
+        status, response = request_json(base_url, "/query", payload)
+        if status != 429:
+            break
+        if attempt < max_attempts:
+            wait_seconds = 60 * attempt
+            print(f"  provider rate limit; waiting {wait_seconds}s before retry {attempt + 1}/{max_attempts}")
+            time.sleep(wait_seconds)
+    return status, response, round((time.perf_counter() - total_started) * 1000, 2)
+
+
