@@ -97,3 +97,7 @@ def _strip_code_fence(value: str) -> str:
     return cleaned
 
 
+def _strip_wrapping_quotes(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+        return value[1:-1].strip()
+    return value
