@@ -251,3 +251,33 @@ def ingest(req: IngestRequest = IngestRequest()):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/schema", summary="Retrieve ingested schema chunks", tags=["Schema"])
+def schema(connection_id: str | None = None):
+    if connection_id:
+        try:
+            engine = connections.get_connection_engine(connection_id, owner_id="default")
+            chunks = extract_schema_from_engine(engine)
+            return {"count": len(chunks), "chunks": chunks, "connection_id": connection_id}
+        except connections.ConnectionError as exc:
+            raise HTTPException(status_code=404, detail=str(exc))
+        except Exception as exc:
+            raise HTTPException(status_code=502, detail="Unable to inspect the selected database schema") from exc
+    try:
+        schema_path = os.path.join(os.path.dirname(os.getenv("MOCK_DB_PATH", "data/local.db")), "schema_chunks.json")
+        if not os.path.exists(schema_path):
+            db_path = os.getenv("MOCK_DB_PATH", "data/local.db")
+            if os.path.exists(db_path):
+                with sqlite3.connect(db_path) as conn:
+                    tables = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name").fetchall()
+                    chunks = []
+                    for (table,) in tables:
+                        cols = [row[1] for row in conn.execute(f'PRAGMA table_info("{table}")').fetchall()]
+                        chunks.append(f"Table: {table}\nColumns: {', '.join(cols)}")
+                with open(schema_path, "w", encoding="utf-8") as out:
+                    json.dump(chunks, out)
+        with open(schema_path) as f:
+            chunks = json.load(f)
+        return {"count": len(chunks), "chunks": chunks}
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Schema not ingested yet. Call POST /ingest first.")
+
