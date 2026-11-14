@@ -165,3 +165,51 @@ pip install -r requirements.txt
 
 ---
 
+## Configuration
+
+### Environment Variables
+
+```bash
+GROQ_API_KEY=your_key
+DB_URI=sqlite:///data/local.db
+PINECONE_API_KEY=your_key
+PINECONE_INDEX_NAME=sql-schema-rag
+PINECONE_NAMESPACE=default
+PINECONE_REGION=us-east-1
+```
+
+---
+
+### Schema Ingestion
+
+Create and seed the local SQLite database from the provided sustainability schema:
+
+```bash
+python scripts/create_sample_db.py
+```
+
+```bash
+python scripts/ingest_schema.py \
+  --db_uri $DB_URI \
+  --output data/schema_chunks.json
+```
+
+Optional flags:
+
+```bash
+python scripts/ingest_schema.py \
+   --db_uri $DB_URI \
+   --output data/schema_chunks.json \
+   --pinecone_index $PINECONE_INDEX_NAME \
+   --pinecone_namespace $PINECONE_NAMESPACE \
+   --pinecone_region $PINECONE_REGION
+```
+
+This will:
+
+- Extract tables, columns, relationships
+- Chunk schema
+- Generate embeddings
+
+---
+
