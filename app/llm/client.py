@@ -17,3 +17,19 @@ try:
 except ImportError:
     ChatGoogleGenerativeAI = None
 
+class ProviderError(RuntimeError):
+    def __init__(self, code: str, message: str):
+        self.code = code
+        super().__init__(message)
+
+@dataclass(frozen=True)
+class ProviderProfile:
+    provider_id: str
+    owner_id: str
+    name: str
+    provider_type: str
+    api_key: str
+    model: str
+    base_url: str | None = None
+    enabled: bool = True
+
