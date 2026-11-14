@@ -33,3 +33,9 @@ class ProviderProfile:
     base_url: str | None = None
     enabled: bool = True
 
+def _fernet() -> Fernet:
+    key = os.getenv("SECRETS_ENCRYPTION_KEY") or os.getenv("CONNECTION_ENCRYPTION_KEY")
+    if not key: raise ProviderError("secrets_not_configured", "SECRETS_ENCRYPTION_KEY is not configured")
+    try: return Fernet(key.encode())
+    except Exception as exc: raise ProviderError("invalid_secrets_key", "Configured secrets key is invalid") from exc
+
