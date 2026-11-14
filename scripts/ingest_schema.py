@@ -124,3 +124,38 @@ def upsert_schema_chunks_to_pinecone(
     return len(vectors)
 
 
+def delete_pinecone_namespace(index_name: str, namespace: str, api_key: str) -> None:
+    """Delete all vectors belonging to one connection profile."""
+    Pinecone(api_key=api_key).Index(index_name).delete(delete_all=True, namespace=namespace)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--db_uri", required=True)
+    parser.add_argument("--output", default="data/schema_chunks.json")
+    parser.add_argument("--pinecone_index", default=settings.pinecone_index_name)
+    parser.add_argument("--pinecone_namespace", default=settings.pinecone_namespace)
+    parser.add_argument("--pinecone_region", default=settings.pinecone_region)
+    parser.add_argument("--skip_pinecone", action="store_true")
+    args = parser.parse_args()
+
+    chunks = extract_schema(args.db_uri)
+    with open(args.output, "w") as f:
+        json.dump(chunks, f, indent=2)
+    print(f"Wrote {len(chunks)} schema chunks to {args.output}")
+
+    if args.skip_pinecone:
+        print("Skipped Pinecone upsert")
+    else:
+        api_key = settings.pinecone_api_key
+        if not api_key:
+            raise RuntimeError("PINECONE_API_KEY is required unless --skip_pinecone is used")
+        upserted = upsert_schema_chunks_to_pinecone(
+            chunks=chunks,
+            index_name=args.pinecone_index,
+            namespace=args.pinecone_namespace,
+            region=args.pinecone_region,
+            api_key=api_key,
+        )
+        print(
+            f"Upserted {upserted} schema vectors to Pinecone index '{args.pinecone_index}' namespace '{args.pinecone_namespace}'"
+        )
