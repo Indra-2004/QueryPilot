@@ -33,3 +33,15 @@ def create_profile(*, owner_id: str, name: str, provider_type: str, api_key: str
         session.add(ProviderProfileRecord(**record)); session.commit()
     return provider_metadata(record)
 
+def get_profile(provider_id: str, owner_id: str = "default") -> ProviderProfile | None:
+    with Session(metadata_engine()) as session:
+        row = session.scalar(select(ProviderProfileRecord).where(ProviderProfileRecord.provider_id == provider_id))
+        record = row.__dict__.copy() if row else None
+        if record: record.pop("_sa_instance_state", None)
+    if not record or record["owner_id"] != owner_id: return None
+    return ProviderProfile(provider_id=record["provider_id"], owner_id=record["owner_id"],
+        name=record["name"], provider_type=record["provider_type"],
+        api_key=__import__("app.llm.client", fromlist=["decrypt_secret"]).decrypt_secret(record["encrypted_api_key"]),
+        model=record["model"], base_url=(__import__("app.llm.client", fromlist=["decrypt_secret"]).decrypt_secret(record["encrypted_base_url"]) if record.get("encrypted_base_url") else None),
+        enabled=record.get("enabled", True))
+
