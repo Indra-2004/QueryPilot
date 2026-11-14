@@ -108,3 +108,14 @@ Correction Loop (LLM)
 
 ---
 
+## Tech Stack
+
+- **Orchestration:** LangGraph
+- **LLM Inference:** Groq
+- **Embeddings:** SentenceTransformers / OpenAI-compatible
+- **Vector Store:** Pinecone (primary) + FAISS fallback
+- **Database:** PostgreSQL / MySQL / SQLite
+- **Backend:** Python (FastAPI optional)
+
+---
+
