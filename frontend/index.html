@@ -20,3 +20,18 @@
     <main class="main">
       <header class="topbar"><div><span class="eyebrow">AGENTIC TEXT TO SQL</span><h1 id="pageTitle">Query studio</h1></div><div class="top-actions"><button class="ghost" id="healthBtn">Check health</button><span class="health" id="healthState">Unknown</span></div></header>
 
+      <section class="view" id="queryView">
+        <div class="query-grid">
+          <div class="panel prompt-panel">
+            <div class="panel-head"><div><span class="eyebrow">NATURAL LANGUAGE</span><h2>Ask your data</h2></div><span class="step">01 / 03</span></div>
+            <label for="question">What do you want to know?</label>
+            <textarea id="question" placeholder="Show total travel emissions per user in April 2026..."></textarea>
+            <div class="controls"><label>Database<select id="connectionSelect"><option value="">Default connection</option></select></label><label>Provider<select id="providerSelect"><option value="">Default Groq</option></select></label></div>
+            <button class="primary" id="runQuery">Run query <span>↗</span></button>
+            <div class="hint">Read-only execution · correction loop enabled · max 3 retries</div>
+          </div>
+          <div class="panel result-panel"><div class="panel-head"><div><span class="eyebrow">LIVE TRACE</span><h2 id="resultTitle">Waiting for a query</h2></div><span class="trace-state" id="traceState">IDLE</span></div><div id="resultBody" class="result-body empty"><div class="empty-icon">⌁</div><p>Your generated SQL and returned rows will appear here.</p></div></div>
+        </div>
+        <div class="panel schema-panel"><div class="panel-head"><div><span class="eyebrow">SCHEMA CONTEXT</span><h2>Available tables</h2></div><div><button class="ghost small" id="seedDemo">Queue demo data</button> <button class="ghost small" id="refreshSchema">Refresh</button></div></div><div class="table-list" id="schemaList"><span class="muted">Load a schema to see available tables.</span></div></div>
+      </section>
+
