@@ -180,3 +180,17 @@ def delete_profile(connection_id: str, owner_id: str) -> bool:
     return True
 
 
+def get_connection_engine(connection_id: str, *, owner_id: str | None = None) -> Engine:
+    profile = get_profile(connection_id, owner_id)
+    if not profile or not profile.enabled:
+        raise ConnectionError("Unknown or disabled database connection")
+    with _lock:
+        if connection_id not in _engines:
+            try:
+                uri = _fernet().decrypt(profile.encrypted_uri.encode()).decode()
+            except InvalidToken as exc:
+                raise ConnectionError("Stored database credentials cannot be decrypted") from exc
+            _engines[connection_id] = create_engine(uri, pool_pre_ping=True, pool_recycle=1800)
+        return _engines[connection_id]
+
+
