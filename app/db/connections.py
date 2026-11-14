@@ -153,3 +153,16 @@ def profile_public(profile: ConnectionProfile) -> dict[str, Any]:
             "created_at": profile.created_at.isoformat() if profile.created_at else None}
 
 
+def list_profiles(owner_id: str) -> list[dict[str, Any]]:
+    with Session(metadata_engine(), expire_on_commit=False) as session:
+        return [profile_public(p) for p in session.scalars(select(ConnectionProfile).where(ConnectionProfile.owner_id == owner_id)).all()]
+
+
+def get_profile(connection_id: str, owner_id: str | None = None) -> ConnectionProfile | None:
+    with Session(metadata_engine(), expire_on_commit=False) as session:
+        profile = session.get(ConnectionProfile, connection_id)
+        if profile and owner_id is not None and profile.owner_id != owner_id:
+            return None
+        return profile
+
+
