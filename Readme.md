@@ -151,3 +151,17 @@ NerfSQL/
 
 ---
 
+## Installation
+
+```bash
+git clone https://github.com/sdm0p/NerfSQL.git
+cd NerfSQL
+
+python -m venv venv
+source venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+---
+
