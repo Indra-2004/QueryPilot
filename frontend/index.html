@@ -39,3 +39,10 @@
 
       <section class="view hidden" id="providersView"><div class="section-intro"><span class="eyebrow">MODEL ROUTING</span><h2>Bring your own model</h2><p>Use Groq, OpenAI, Anthropic, Gemini, or any OpenAI-compatible endpoint.</p></div><div class="split"><form class="panel form-panel" id="providerForm"><h3>Add a provider</h3><label>Display name<input name="name" required placeholder="My OpenRouter" /></label><label>Provider type<select name="provider_type"><option value="groq">Groq</option><option value="openai">OpenAI</option><option value="anthropic">Anthropic</option><option value="gemini">Gemini</option><option value="openai_compatible">OpenAI-compatible</option></select></label><label>API key<input name="api_key" type="password" required placeholder="sk-..." /></label><label>Model<input name="model" required placeholder="openai/gpt-oss-20b" /></label><label>Base URL <span class="optional">optional</span><input name="base_url" placeholder="https://api.example.com/v1" /></label><button class="primary">Validate & save <span>↗</span></button><p class="form-message" id="providerMessage"></p></form><div class="panel list-panel"><div class="panel-head"><h3>Configured providers</h3><button class="ghost small" id="refreshProviders">Refresh</button></div><div id="providersList" class="stack-list"><span class="muted">No providers yet.</span></div></div></div></section>
 
+      <section class="view hidden" id="historyView"><div class="section-intro"><span class="eyebrow">OBSERVABILITY</span><h2>Run history</h2><p>Follow the question, model, SQL, retries, and returned data for each chat.</p></div><div class="panel history-panel"><div class="panel-head"><h3>Recent sessions</h3><button class="ghost small" id="refreshHistory">Refresh</button></div><div id="historyList" class="history-list"><span class="muted">No sessions yet.</span></div></div></section>
+    </main>
+  </div>
+  <div class="toast" id="toast"></div>
+  <script src="/frontend/app.js"></script>
+</body>
+</html>
