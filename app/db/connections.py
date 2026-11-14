@@ -194,3 +194,10 @@ def get_connection_engine(connection_id: str, *, owner_id: str | None = None) ->
         return _engines[connection_id]
 
 
+def execute_profile_query(connection_id: str, sql: str, *, owner_id: str | None = None) -> list[dict[str, Any]]:
+    from sqlalchemy import text
+    with get_connection_engine(connection_id, owner_id=owner_id).connect() as conn:
+        result = conn.execute(text(sql))
+        return [dict(row._mapping) for row in result]
+
+
