@@ -281,3 +281,60 @@ def schema(connection_id: str | None = None):
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Schema not ingested yet. Call POST /ingest first.")
 
+@app.post("/query", summary="Run a natural language query", tags=["Query"])
+def query(req: QueryRequest, chat_id: str | None = Query(None)):
+    try:
+        resp: QueryResponse = query_agent(req.question, chat_id=chat_id, connection_id=req.connection_id,
+                                          provider_id=req.provider_id, model=req.model,
+                                          schema_strategy=req.schema_strategy)
+    except Exception as exc:
+        message = str(exc)
+        lowered = message.lower()
+        logger.warning("Query provider failure type=%s", type(exc).__name__)
+        if "rate limit" in lowered or "rate_limit" in lowered or "429" in lowered:
+            raise HTTPException(
+                status_code=429,
+                detail={"code": "provider_rate_limit", "message": "The LLM provider rate limit was reached. Retry after the quota resets."},
+                headers={"Retry-After": "60"},
+            )
+        if "authentication" in lowered or "invalid api key" in lowered or "401" in lowered:
+            raise HTTPException(
+                status_code=401,
+                detail={"code": "provider_authentication_failed", "message": "The selected LLM provider rejected its API key."},
+            )
+        if "model_not_found" in lowered or "does not exist" in lowered:
+            raise HTTPException(status_code=422, detail="The selected LLM model is unavailable. Choose a supported model and retry.")
+        raise HTTPException(
+            status_code=502,
+            detail={"code": "provider_request_failed", "message": "The selected LLM provider could not complete the request."},
+        )
+
+    # Build response conditionally
+    response_data = {
+        "chat_id": resp.chat_id,
+        "error": resp.error,
+        "retries": resp.retries,
+        "connection_id": resp.connection_id,
+        "provider_id": resp.provider_id,
+        "model": resp.model,
+        "metrics": {
+            "schema_strategy": resp.schema_strategy,
+            "input_tokens": resp.input_tokens,
+            "output_tokens": resp.output_tokens,
+            "llm_calls": resp.llm_calls,
+            "llm_latency_ms": resp.llm_latency_ms,
+            "total_latency_ms": resp.total_latency_ms,
+        },
+    }
+
+    # Only include SQL fields if SQL was successfully generated
+    if resp.sql.strip():
+        response_data["sql"] = _compact_sql(resp.sql)
+        response_data["sql_raw"] = resp.sql
+
+    # Include result if available
+    if resp.result is not None:
+        response_data["result"] = resp.result
+
+    return response_data
+
