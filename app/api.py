@@ -201,3 +201,53 @@ def delete_connection(connection_id: str):
     if not connections.delete_profile(connection_id, "default"): raise HTTPException(status_code=404, detail="Connection not found")
     return {"deleted": True, "connection_id": connection_id}
 
+@app.post("/ingest", summary="Ingest database schema", tags=["Schema"])
+def ingest(req: IngestRequest = IngestRequest()):
+    db_uri = req.db_uri or settings.db_uri
+    local_fallback = "sqlite:///data/local.db"
+    if not db_uri:
+        if os.path.exists("data/local.db"):
+            db_uri = local_fallback
+        else:
+            raise HTTPException(status_code=400, detail="db_uri required")
+    try:
+        chunks = extract_schema(db_uri)
+    except Exception as e:
+        # For local development, fall back if configured DB credentials are invalid.
+        if req.db_uri is None and db_uri != local_fallback and os.path.exists("data/local.db"):
+            try:
+                chunks = extract_schema(local_fallback)
+                db_uri = local_fallback
+            except Exception:
+                raise HTTPException(status_code=500, detail=str(e))
+        else:
+            raise HTTPException(status_code=500, detail=str(e))
+    try:
+        with open("data/schema_chunks.json", "w") as f:
+            json.dump(chunks, f, indent=2)
+        # reset retriever so it reloads fresh chunks
+        import app.main as _main
+
+        _main._retriever = None
+
+        pinecone_status = "skipped"
+        api_key = settings.pinecone_api_key
+        if api_key:
+            upserted = upsert_schema_chunks_to_pinecone(
+                chunks=chunks,
+                index_name=settings.pinecone_index_name,
+                namespace=settings.pinecone_namespace,
+                region=settings.pinecone_region,
+                api_key=api_key,
+            )
+            pinecone_status = f"upserted:{upserted}"
+
+        return {
+            "ingested": len(chunks),
+            "tables": [c.split("\n")[0].replace("Table: ", "") for c in chunks],
+            "pinecone": pinecone_status,
+            "source_db_uri": db_uri,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
