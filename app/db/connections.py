@@ -146,3 +146,10 @@ def create_profile(*, owner_id: str, name: str, uri: str, provider_id: str | Non
     return profile_public(profile) | {"health": health}
 
 
+def profile_public(profile: ConnectionProfile) -> dict[str, Any]:
+    return {"connection_id": profile.connection_id, "owner_id": profile.owner_id, "name": profile.name,
+            "dialect": profile.dialect, "provider_id": profile.provider_id, "enabled": profile.enabled,
+            "last_health_check": profile.last_health_check.isoformat() if profile.last_health_check else None,
+            "created_at": profile.created_at.isoformat() if profile.created_at else None}
+
+
