@@ -269,3 +269,17 @@ Metrics:
 
 ---
 
+## Guardrails
+
+- Blocks:
+  - `DROP`, `DELETE`, `TRUNCATE`, `ALTER`
+
+- Enforces:
+  - read-only queries
+  - schema-constrained SQL
+
+- Retry limit:
+  - default: 3 attempts
+
+---
+
