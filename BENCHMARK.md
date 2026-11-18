@@ -1,4 +1,4 @@
-# NerfSQL reproducible metrics
+# QueryPilot reproducible metrics
 
 The benchmark contains 55 labeled scenarios: 20 single-table questions, 30 join or aggregation questions, and 5 deliberately unanswerable questions. It compares connection-scoped Pinecone retrieval (`rag`) with the complete selected database schema (`full`).
 
@@ -14,11 +14,11 @@ The files under `benchmark-results/` are generated evidence and should include t
 
 ## Free-tier benchmark
 
-First deploy the current API and ensure the `sd` connection is present and its schema has been refreshed into Pinecone. Then run:
+Start the API locally (or replace `http://localhost:8000` below with your deployed Render URL) and ensure the `sd` connection is present and its schema has been refreshed into Pinecone. Then run:
 
 ```powershell
 .\venv\Scripts\python.exe tests\run_metrics.py `
-  --base-url https://nerfsql-demo.onrender.com `
+  --base-url http://localhost:8000 `
   --connection-name sd `
   --modes rag full `
   --delay 10 `
@@ -51,7 +51,7 @@ Run 100 virtual users against lightweight endpoints:
 ```powershell
 .\venv\Scripts\locust.exe -f tests\locustfile.py `
   --headless --users 100 --spawn-rate 10 --run-time 2m `
-  --host https://nerfsql-demo.onrender.com `
+  --host http://localhost:8000 `
   --csv benchmark-results\load
 ```
 
