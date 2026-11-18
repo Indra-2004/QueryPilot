@@ -1,5 +1,5 @@
 services:
-  nerfsql:
+  querypilot:
     build: .
     ports:
       - "8000:8000"
@@ -7,7 +7,7 @@ services:
     environment:
       MOCK_DB_PATH: /app/data/local.db
     volumes:
-      - nerfsql_data:/app/data
+      - querypilot_data:/app/data
 
 volumes:
-  nerfsql_data:
+  querypilot_data:
