@@ -4,7 +4,7 @@ import os
 from locust import HttpUser, between, task
 
 
-class NerfSQLUser(HttpUser):
+class QueryPilotUser(HttpUser):
     wait_time = between(0.5, 1.5)
 
     @task(5)
