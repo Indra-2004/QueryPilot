@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: nerfsql-demo
+    name: querypilot-demo
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
@@ -11,7 +11,7 @@ services:
       - key: PINECONE_API_KEY
         sync: false
       - key: PINECONE_INDEX_NAME
-        value: nerfsql-schema
+        value: querypilot-schema
       - key: PINECONE_NAMESPACE
         value: default
       - key: PINECONE_REGION
@@ -25,4 +25,4 @@ services:
       - key: MOCK_DB_PATH
         value: /app/data/local.db
       - key: ALLOWED_HOSTS
-        value: nerfsql-demo.onrender.com,localhost,127.0.0.1
+        value: querypilot-demo.onrender.com,localhost,127.0.0.1
