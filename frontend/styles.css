@@ -15,3 +15,4 @@ textarea,input,select{background:#0a1012;border-color:#304047;border-radius:11px
 .ghost{border-color:#34474e;border-radius:11px}.ghost:hover{background:#152225;border-color:#53756e}
 .table-chip{border-color:#35534d;background:#10201e;border-radius:999px;padding:8px 12px}.profile{border-color:#304047;border-radius:13px;background:#0d1416;transition:transform .2s ease,border-color .2s ease}.profile:hover{transform:translateY(-2px);border-color:#4d7069}
 .toast{border:1px solid #b4f1df;box-shadow:0 16px 40px -20px #8be8c9;background:#dffff4;border-radius:12px}
+.side-link{display:block;margin-top:14px;padding:10px 12px;border:1px solid var(--line);border-radius:11px;color:var(--muted);text-decoration:none;font-size:13px;transition:color .2s ease,border-color .2s ease}.side-link:hover,.side-link:focus-visible{color:var(--text);border-color:var(--accent);outline:none}
