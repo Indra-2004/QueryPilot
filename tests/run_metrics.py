@@ -112,7 +112,7 @@ def summarize(rows: list[dict]) -> dict:
 
 def markdown_report(report: dict) -> str:
     summaries = report["summary"]
-    lines = ["# NerfSQL benchmark report", "", f"Generated: {report['generated_at']}", "", "| Mode | Cases | Accuracy | Hallucination rate | Input tokens | p95 latency |", "|---|---:|---:|---:|---:|---:|"]
+    lines = ["# QueryPilot benchmark report", "", f"Generated: {report['generated_at']}", "", "| Mode | Cases | Accuracy | Hallucination rate | Input tokens | p95 latency |", "|---|---:|---:|---:|---:|---:|"]
     for mode in ("rag", "full"):
         row = summaries.get(mode, {})
         lines.append(f"| {mode.upper()} | {row.get('cases', 0)} | {row.get('accuracy_pct', 0)}% | {row.get('hallucination_rate_pct', 0)}% | {row.get('total_input_tokens', 0)} | {row.get('p95_latency_ms', 0)} ms |")
@@ -127,7 +127,7 @@ def reduction(before: float, after: float) -> float:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--base-url", default="https://nerfsql-demo.onrender.com")
+    parser.add_argument("--base-url", default="http://localhost:8000")
     parser.add_argument("--connection-id")
     parser.add_argument("--connection-name", default="sd")
     parser.add_argument("--provider-id")
