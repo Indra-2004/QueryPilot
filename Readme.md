@@ -318,6 +318,12 @@ This project focuses on:
 
 ---
 
+## Author
+
+[Indra-2004](https://github.com/Indra-2004) · [Portfolio](https://indra-2004.github.io/jobportfolio/)
+
+---
+
 ## License
 
 MIT License
