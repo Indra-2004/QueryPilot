@@ -4,8 +4,8 @@ import json, os, sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-QUEUE_KEY = os.getenv("SEED_QUEUE_KEY", "nerfsql:seed:queue")
-DONE_PREFIX = os.getenv("SEED_DONE_PREFIX", "nerfsql:seed:done:")
+QUEUE_KEY = os.getenv("SEED_QUEUE_KEY", "querypilot:seed:queue")
+DONE_PREFIX = os.getenv("SEED_DONE_PREFIX", "querypilot:seed:done:")
 
 def _redis():
     url = os.getenv("UPSTASH_REDIS_URL") or os.getenv("REDIS_URL")
