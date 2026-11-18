@@ -29,7 +29,7 @@ from app.llm.client import get_llm, ProviderError
 from app.queue import enqueue_seed, drain_seed_queue
 
 app = FastAPI(title="SQL-RAG Agent", description="Natural language to SQL agent powered by RAG", version="1.0.0")
-logger = logging.getLogger("nerfsql.api")
+logger = logging.getLogger("querypilot.api")
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
 @app.on_event("startup")
@@ -104,7 +104,7 @@ def _compact_sql(sql: str) -> str:
 @app.get("/health", summary="Health check", tags=["Utility"])
 def health():
     """Lightweight liveness probe used by Render and external monitors."""
-    return {"status": "ok", "service": "nerfsql"}
+    return {"status": "ok", "service": "querypilot"}
 
 @app.get("/ready", tags=["Utility"])
 def ready():
